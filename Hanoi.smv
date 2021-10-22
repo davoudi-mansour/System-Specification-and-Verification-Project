@@ -1,0 +1,24 @@
+MODULE main
+VAR 
+   SmallDisk : Disk(1,2,MediumDisk.location,3,LargeDisk.location); 
+   MediumDisk : Disk(2,1,SmallDisk.location,3,LargeDisk.location);  
+   LargeDisk : Disk(3,1,SmallDisk.location,2,MediumDisk.location);  
+
+MODULE Disk(DiskNum,OtherDiskNum1,OtherDiskLoc1,OtherDiskNum2,OtherDiskLoc2)  
+VAR
+	location : 1..3;
+ASSIGN
+	init(location) := 1;
+
+	next(location) := case
+		(DiskNum<OtherDiskNum1) & (DiskNum<OtherDiskNum2) : {1,2,3};  --small disk 1
+		(DiskNum>OtherDiskNum1) & (DiskNum<OtherDiskNum2) & (location!=OtherDiskLoc1) & (OtherDiskLoc1=1) : {2,3};   --medium disk
+		(DiskNum>OtherDiskNum1) & (DiskNum<OtherDiskNum2) & (location!=OtherDiskLoc1) & (OtherDiskLoc1=2) : {1,3};   --medium disk
+		(DiskNum>OtherDiskNum1) & (DiskNum<OtherDiskNum2) & (location!=OtherDiskLoc1) & (OtherDiskLoc1=3) : {1,2};   --medium disk
+		(DiskNum>OtherDiskNum1) & (DiskNum>OtherDiskNum2) & (location!=OtherDiskLoc1) & (location!=OtherDiskLoc2) & (OtherDiskLoc1=OtherDiskLoc2) & (OtherDiskLoc1=1): {2,3};   --Large disk 
+		(DiskNum>OtherDiskNum1) & (DiskNum>OtherDiskNum2) & (location!=OtherDiskLoc1) & (location!=OtherDiskLoc2) & (OtherDiskLoc1=OtherDiskLoc2) & (OtherDiskLoc1=2): {1,3};   --Large disk 
+		(DiskNum>OtherDiskNum1) & (DiskNum>OtherDiskNum2) & (location!=OtherDiskLoc1) & (location!=OtherDiskLoc2) & (OtherDiskLoc1=OtherDiskLoc2) & (OtherDiskLoc1=3): {1,2};   --Large disk 
+		(DiskNum>OtherDiskNum1) & (DiskNum>OtherDiskNum2) & (location!=OtherDiskLoc1) & (location!=OtherDiskLoc2) & (OtherDiskLoc1!=OtherDiskLoc2) : location;   --Large disk 
+		TRUE : location;
+		esac;
+

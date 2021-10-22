@@ -1,0 +1,296 @@
+
+
+MODULE car(s1tl,s2tl,s3tl,s4tl,s5tl,s6tl,s7tl,s8tl,s9tl,n2In,n3In,n5In,n6In,n7In,n8In,n2Out,n3Out,n5Out,n6Out,n7Out,n8Out,n9Out,congestion)
+
+VAR
+	location : {s1,s2,s3,s4,s5,s6,s7,s8,s9,n2,n3,n5,n6,n7,n8};
+	s1tt : 1..20;
+	s2tt : 1..20;
+	s3tt : 1..20;
+	s4tt : 1..20;
+	s5tt : 1..20;
+	s6tt : 1..20;
+	s7tt : 1..20;
+	s8tt : 1..20;
+	s9tt : 1..20;
+	state : {blocked,free};
+ASSIGN
+	init(location) := n7;
+	next(location):= case
+	
+				(location = n7) & (s6tl <= s5tl)  : s6;
+				(location = n7) & (s5tl <= s6tl)  : s5;
+				(location = s6): {n8,n7};
+			        (location = s5) & (s5tt =1): {n6,n7};
+		                (location = s5) & (s5tt) > 1: s5;
+			        (location = n8) & (s7tl <= s8tl) & (s7tl <= s9tl) & (s7tl <= s6tl) : s7;
+			        (location = n8) & (s8tl <= s7tl) & (s8tl <= s9tl) & (s8tl <= s6tl) : s8;
+			        (location = n8) & (s9tl <= s8tl) & (s9tl <= s7tl) & (s9tl <= s6tl) : s9;
+			        (location = n8) & (s6tl <= s8tl) & (s6tl <= s7tl) & (s6tl <= s9tl) : s6;
+				(location = n6) & (s4tl <= s7tl) & (s4tl <= s5tl) : s4;
+				(location = n6) & (s7tl <= s4tl) & (s7tl <= s5tl) : s7;
+				(location = n6) & (s5tl <= s4tl) & (s5tl <= s7tl) : s5;
+			        (location = s7) & (s7tt =1) : {n6,n8};
+			        (location = s7) & (s7tt >1) : s7;
+			        (location = s9)& (s9tt = 1): {n3,n8};
+	    		        (location = s9) & (s9tt > 1): s9;		
+			        (location = s8) & (s8tt =1): {n2,n8};
+				(location = s8) & (s8tt > 1): s8;
+                                (location = s6) & (s6tt =1): {n7,n8};		
+              		        (location = s6) & (s6tt >1): s6;				
+				(location = s4)& (s4tt =1): {n6,n5};
+				(location = s4)& (s4tt >1): s4;
+				(location = n5) & (s1tl <= s3tl) & (s1tl <= s4tl): s1;
+                                (location = n5) & (s3tl <= s1tl) & (s3tl <= s4tl) : s3; 
+				(location = n5) & (s4tl <= s1tl) & (s4tl <= s3tl) : s4; 
+		                (location = s1) & (s1tt =1) : {n2,n5};
+		                (location = s1) &(s1tt >1) : s1;
+			        (location = s3) & (s3tt=1): {n3,n5};
+			        (location = s3) & (s3tt>1): s3;
+				(location = n2) & (s8tl <= s2tl) & (s8tl <= s1tl) : s8;
+				(location = n2) & (s2tl <= s8tl) &(s2tl <= s1tl) : s2;
+				(location = n2) & (s1tl <= s8tl) &(s1tl <= s2tl) : s1;
+			        (location = s2) & s2tt=1: {n3,n2};
+			        (location = s2) & s2tt>1: s2;
+                                (location = n3) & (s9tl <= s3tl) & (s9tl < s2tl) : s9; 
+                                (location = n3)& (s3tl <= s9tl)& (s3tl < s2tl): s3;
+                                (location = n3) & (s2tl <= s9tl) &(s2tl < s3tl): s2;
+				TRUE:location;
+				esac;
+				
+	init(state):= free;
+	next(state) := case
+				(location = n2) & ( s1tl > 5) & (s2tl > 6) & (s8tl > 4)   : blocked;
+				(location = n3) & ( s2tl > 6) & (s3tl > 5) & (s9tl > 5)   : blocked;
+				(location = n8) & ( s6tl > 4) & (s7tl > 3) & (s8tl > 4) & (s9tl > 4) : blocked;
+				(location = n5) & ( s4tl > 4) & (s3tl > 5) & (s1tl > 5)   : blocked;
+				(location = n6) & ( s4tl > 4) & (s7tl > 3) : blocked;
+				(location = n7) & ( s6tl > 4) & (s5tl > 7) : blocked;
+				TRUE:state;
+				esac;	
+				
+	next(n2In) := case
+				(n2In < 100) &(location = s1 & s1tt=1) | (location = s2 & s2tt=1) | (location = s8 & s8tt=1)   : n2In  ;
+				TRUE:n2In;
+				esac;	
+
+	next(n3In) := case
+				(location = s2 & s2tt=1) | (location = s3 & s3tt=1) | (location = s9 & s9tt=1) & (n3In<100) : n3In ;
+				TRUE:n3In;
+				esac;	
+	next(n5In) := case
+				(location = s1 & s1tt=1) | (location = s3 & s3tt=1) | (location = s4 & s4tt=1) & (n5In<100)  : n5In ;
+				TRUE:n5In;
+				esac;
+	next(n6In) := case
+				(location = s4 & s4tt=1) | (location = s5 & s5tt=1) | (location = s7 & s7tt=1) & (n6In<100)  : n6In ;
+				TRUE:n6In;
+				esac;	
+	next(n7In) := case
+				(location = s5 & s5tt=1) | (location = s6 & s6tt=1)& (n7In<100)   : n7In ;
+				TRUE:n7In;
+				esac;	
+
+	next(n8In) := case
+				(location = s6 & s6tt=1) | (location = s7 & s7tt=1) | (location = s8 & s8tt=1)|(location = s9 & s9tt=1) & (n8In<100)  : n8In ;
+				TRUE:n8In;
+				esac;	
+
+	next(n2Out) := case
+				(location = n2) & (state != blocked) & (n2Out<100) : n2Out ;
+				TRUE:n2Out;
+				esac;			
+				
+	next(n3Out) := case
+				(location = n3) & (state != blocked)& (n3Out<100) : n3Out ;
+				TRUE:n3Out;
+				esac;
+				
+	next(n5Out) := case
+				(location = n5) & (state != blocked)& (n5Out<100) : n5Out ;
+				TRUE:n5Out;
+				esac;
+				
+	next(n6Out) := case
+				(location = n6) & (state != blocked)& (n6Out<100) : n6Out ;
+				TRUE:n6Out;
+				esac;
+
+	next(n7Out) := case
+				(location = n7) & (state != blocked) & (n7Out<100): n7Out ;
+				TRUE:n7Out;
+				esac;		
+
+	next(n8Out) := case
+				(location = n8) & (state != blocked) & (n8Out<100): n8Out ;
+				TRUE:n8Out;
+				esac;
+
+				
+				
+	init(s1tt):=3;			
+	next(s1tt) := case
+				(location = s1)  : s1tt - 1;
+				TRUE:s1tt;
+				esac;
+	init(s2tt):=4;			
+	next(s2tt) := case
+				(location = s2)  : s2tt - 1;
+				TRUE:s2tt;
+				esac;	
+    init(s3tt):=3;
+	next(s3tt) := case
+				(location = s3)  : s3tt - 1;
+				TRUE:s3tt;
+				esac;
+				
+    init(s4tt):=7;
+	next(s4tt) := case
+				(location = s4)  : s4tt - 1;
+				TRUE:s4tt;
+				esac;		
+				
+	init(s5tt):=6;	
+	next(s5tt) := case
+				(location = s5)  : s5tt - 1;
+				TRUE:s5tt;
+				esac;	
+    init(s6tt):=1;	
+	next(s6tt) := case
+				(location = s6)  : s6tt - 1;
+				TRUE:s6tt;
+				esac;
+	init(s7tt):=4;	
+	next(s7tt) := case
+				(location = s7)  : s7tt - 1;
+				TRUE:s7tt;
+				esac;
+	init(s8tt):=6;	
+	next(s8tt) := case
+				(location = s8)  : s8tt - 1;
+				TRUE:s8tt;
+				esac;
+	init(s9tt):=2;	
+	next(s9tt) := case
+				(location = s9)  : s9tt - 1;
+				TRUE:s9tt;
+				esac;	
+        init(s1tl) :=0;
+	next(s1tl) := case
+				(location = s1) & (s1tt=3) &(s1tl < 100) : s1tl + 1;
+				(location = s1) & (s1tt=1) & (s1tl>0) : s1tl - 1;
+
+				TRUE:s1tl;
+				esac;
+	next(s2tl) := case
+				(location = s2) & (s2tt=4)& (s2tl < 100) : s2tl + 1;
+				(location = s2) & (s2tt=1) & (s2tl>0) : s2tl - 1;
+
+				TRUE:s2tl;
+				esac;		
+	next(s3tl) := case
+				(location = s3) & (s3tt=3) & (s3tl < 100) : s3tl + 1;
+				(location = s3) & (s3tt=1) & (s3tl>0) : s3tl - 1;
+
+				TRUE:s3tl;
+				esac;	
+	next(s4tl) := case
+				(location = s4) & (s4tt=7) & (s4tl < 100) : s4tl + 1;
+				(location = s4) & (s4tt=1) & (s4tl>0) : s4tl - 1;
+
+				TRUE:s4tl;
+				esac;	
+	next(s5tl) := case
+				(location = s5) & (s5tt=6) & (s5tl < 100) : s5tl + 1;
+				(location = s5) & (s5tt=1) & (s5tl>0) : s5tl - 1;
+
+				TRUE:s5tl;
+				esac;
+	next(s6tl) := case
+				(location = s6) & (s4tt=1) & (s6tl < 100) : s6tl + 1;
+				(location = s6) & (s6tt=1) & (s6tl>0) : s6tl - 1;
+
+				TRUE:s6tl;
+				esac;
+	next(s7tl) := case
+				(location = s7) & (s7tt=4) & (s7tl < 100) : s7tl + 1;
+				(location = s7) & (s7tt=1) & (s7tl>0) : s7tl - 1;
+
+				TRUE:s7tl;
+				esac;	
+	next(s8tl) := case
+				(location = s8) & (s8tt=6) & (s8tl < 100)  : s8tl + 1;
+				(location = s8) & (s8tt=1) & (s8tl>0) : s8tl - 1;
+
+				TRUE:s8tl;
+				esac;		
+	next(s9tl) := case
+				(location = s9) & (s9tt=2) & (s9tl < 100) : s9tl + 1;
+				(location = s9) & (s9tt=1) & (s9tl>0) : s9tl - 1;
+
+				TRUE:s9tl;
+				esac;
+				
+			
+
+	next(congestion) := case
+				(n2In>n2Out) | (n3In>n3Out) | (n5In>n5Out) | (n6In>n6Out) | (n7In>n7Out) | (n8In>n8Out)  : Yes;
+				TRUE:congestion;
+				esac;				
+
+MODULE main 
+
+VAR
+
+	str1tload: 0..100;
+        str2tload: 0..100;
+	str3tload: 0..100;
+        str4tload: 0..100;
+	str5tload: 0..100;
+	str6tload: 0..100;
+	str7tload: 0..100;
+	str8tload: 0..100;
+	str9tload: 0..100;
+	n2In:0..100;
+	n3In:0..100;
+	n5In:0..100;
+        n6In:0..100;
+	n7In:0..100;
+	n8In:0..100;
+	n2Out:0..100;
+	n3Out:0..100;
+	n5Out:0..100;
+	n6Out:0..100;
+	n7Out:0..100;
+	n8Out:0..100;
+	Congestion: {Yes,No};
+				
+	car1 : car(str1tload,str2tload,str3tload,str4tload,str5tload,str6tload,str7tload,str8tload,str9tload,n2In,n3In,n5In,n6In,n7In,n8In,n2Out,n3Out,n5Out,n6Out,n7Out,n8Out,n9Out,Congestion);
+	
+ASSIGN
+
+
+        init(str2tload) := 0;
+	init(str3tload) := 0;
+	init(str4tload) := 0;
+	init(str5tload) := 0;
+	init(str6tload) := 0;
+	init(str7tload) := 0;
+	init(str8tload) := 0;
+	init(str9tload) := 0;
+	init(n2In) := 0;
+        init(n3In) := 0;
+	init(n5In) := 0;
+	init(n6In) := 0;
+	init(n7In) := 0;
+	init(n8In) := 0;
+	init(n2Out) := 0;
+	init(n3Out) := 0;
+	init(n5Out) := 0;
+	init(n6Out) := 0;
+	init(n7Out) := 0;
+	init(n8Out) := 0;
+	init(Congestion) :=No;
+
+
+
